@@ -1,5 +1,8 @@
 import customtkinter
 from PIL import Image
+import dbms
+
+#supporting functions
 
 def toggle_password_visibility(entry, button):
     if entry.cget('show') == '':
@@ -8,6 +11,15 @@ def toggle_password_visibility(entry, button):
     else:
         entry.configure(show='')
         button.configure(image= customtkinter.CTkImage(light_image=Image.open('Images/pass_hide.png'), size=(20, 20)))
+
+def login_submit(root, username, password):
+    status = dbms.verify_login(username, password)
+    if(status):
+        main_page(root)
+    else:
+        error_label.configure(text='Invalid username/password')
+
+#pages
 
 def login_page(root):
     #clear screen
@@ -89,11 +101,15 @@ def login_page(root):
     userSelectBox = customtkinter.CTkComboBox(button_frame, values=['ADMIN', 'CLUB'])
     userSelectBox.pack(pady=20)
 
-    submit_button = customtkinter.CTkButton(button_frame, text='SUBMIT')
+    submit_button = customtkinter.CTkButton(button_frame, text='SUBMIT', command=lambda : login_submit(root,userID_entry.get(),password_entry.get()))
     submit_button.pack(pady=20)
 
-    register_button = customtkinter.CTkButton(button_frame, text='REGISTER CLUB', command=lambda: RegisterUser(root))
+    register_button = customtkinter.CTkButton(button_frame, text='REGISTER CLUB', command=lambda : RegisterUser(root))
     register_button.pack(pady=20)
+
+    global error_label
+    error_label = customtkinter.CTkLabel(button_frame, text='')
+    error_label.pack(pady=20)
 
 def RegisterUser(root):
     #clear screen
@@ -187,14 +203,35 @@ def RegisterUser(root):
     button_frame = customtkinter.CTkFrame(root, fg_color='#292B2E')
     button_frame.pack(fill='both', expand=True)
 
-    register_button = customtkinter.CTkButton(button_frame, text='REGISTER')
+    register_button = customtkinter.CTkButton(button_frame, text='REGISTER', command=lambda : dbms.register_user(clubID_entry.get(), clubName_entry.get(), password_entry.get()))
     register_button.pack(pady=20)
 
     login_button = customtkinter.CTkButton(
         button_frame,
-        text='LOGIN',
+        text='LOGIN INSTEAD',
         command=lambda: login_page(root)
     )
 
     login_button.pack(pady=20)
 
+def main_page(root):
+    #clear screen
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    # title
+
+    title_frame = customtkinter.CTkFrame(
+        root,
+        border_color='darkblue',
+        border_width=2,
+    )
+    title_frame.pack(fill='x')
+
+    title_label = customtkinter.CTkLabel(
+        title_frame,
+        text="Venue Booking System",
+        font=('Helvetica', 24),
+    )
+
+    title_label.pack(pady=20)
