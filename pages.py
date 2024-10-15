@@ -12,8 +12,8 @@ def toggle_password_visibility(entry, button):
         entry.configure(show='')
         button.configure(image= customtkinter.CTkImage(light_image=Image.open('Images/pass_hide.png'), size=(20, 20)))
 
-def login_submit(root, username, password):
-    status = dbms.verify_login(username, password)
+def login_submit(root, username, password, type):
+    status = dbms.verify_login(username, password, type)
     if(status):
         main_page(root)
     else:
@@ -101,7 +101,7 @@ def login_page(root):
     userSelectBox = customtkinter.CTkComboBox(button_frame, values=['ADMIN', 'CLUB'])
     userSelectBox.pack(pady=20)
 
-    submit_button = customtkinter.CTkButton(button_frame, text='SUBMIT', command=lambda : login_submit(root,userID_entry.get(),password_entry.get()))
+    submit_button = customtkinter.CTkButton(button_frame, text='SUBMIT', command=lambda : login_submit(root,userID_entry.get(),password_entry.get(), userSelectBox.get()))
     submit_button.pack(pady=20)
 
     register_button = customtkinter.CTkButton(button_frame, text='REGISTER CLUB', command=lambda : RegisterUser(root))
