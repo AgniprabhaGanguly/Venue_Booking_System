@@ -31,5 +31,6 @@ def add_data(record):
 
     #for testing purposes
     print(record)
+    print(record)
 
     return False
