@@ -5,6 +5,7 @@ from tkcalendar import Calendar
 from PIL import Image
 import dbms
 
+
 #for toggling password visibility
 def toggle_password_visibility(password_entry, toggle_visibility):
     if password_entry.cget('show') == '':
@@ -20,10 +21,10 @@ def toggle_password_visibility(password_entry, toggle_visibility):
 
 def login_page(root):
     #supporting functions
-    def login_submit(username, password, type, error_label):
-        status = dbms.verify_login(username, password, type)
+    def login_submit(userid, password, type, error_label):
+        status = dbms.verify_login(userid, password, type)
         if (status):
-            main_page(root, dbms.get_clubname(username))
+            main_page(root, userid)
         else:
             error_label.configure(text='Invalid username/password')
 
@@ -218,7 +219,7 @@ def RegisterUser(root):
 
     login_button.pack(pady=20)
 
-def main_page(root, clubname):
+def main_page(root, userid):
     #supporting database functions
     def fetch_data(from_date = None, to_date = None):
         data = dbms.fetch_data(from_date, to_date)
@@ -230,9 +231,12 @@ def main_page(root, clubname):
         if status == False:
             error_label.configure(text='Booking not possible due to conflicting bookings or fields are not given properly')
         if status == True:
-            error_label.configure(text='')
+            error_label.configure(text='Booking sucessful')
             refresh_table()
         win.destroy()
+
+    def cancel_booking():
+        pass
 
     #supporting functions
     def refresh_table():
@@ -313,7 +317,7 @@ def main_page(root, clubname):
         entries.append(entry)
 
         # Booked By
-        entries.append(clubname)
+        entries.append(dbms.get_clubname(userid))
 
         # From Date
         label = customtkinter.CTkLabel(booking_win, text='From Date')
@@ -380,8 +384,12 @@ def main_page(root, clubname):
 
     def filter_table():
         pass
-
     def reset_filters():
+        pass
+    def cancel_booking():
+        pass
+    #admins
+    def approve_booking():
         pass
 
     #clear screen
@@ -409,7 +417,7 @@ def main_page(root, clubname):
     buttons_frame.pack(pady=20)
 
     # filter
-    filter_btn = customtkinter.CTkButton(buttons_frame, text='Apply Date filter', command=lambda: filter_table())
+    filter_btn = customtkinter.CTkButton(buttons_frame, text='Apply filter', command=lambda: filter_table())
     filter_btn.grid(row=1, column=1, padx=10)
 
     # reset filter
@@ -420,13 +428,18 @@ def main_page(root, clubname):
     add_record_btn = customtkinter.CTkButton(buttons_frame, text='Add Booking', command=lambda: booking_window())
     add_record_btn.grid(row=1, column=3, padx=10)
 
+    #cancel booking
+    cancel_booking_btn = customtkinter.CTkButton(buttons_frame, text='Cancel Booking', command=lambda: cancel_booking())
+    cancel_booking_btn.grid(row=1, column=4, padx=10)
+
     # settings
-    settings_btn = customtkinter.CTkButton(buttons_frame, text='Settings', command=lambda: settings_page(root))
+    settings_btn = customtkinter.CTkButton(buttons_frame, text='Settings', command=lambda: settings_page(root, userid))
     settings_btn.grid(row=1, column=5, padx=10)
 
-    #logout
-    logout_btn = customtkinter.CTkButton(buttons_frame, text='Logout', command=lambda : login_page(root))
-    logout_btn.grid(row=1, column=6, padx=10)
+    #aprove/reject bookings for admin
+    if dbms.fetch_user_type(userid) == 'ADMIN':
+        approve_booking_btn = customtkinter.CTkButton(buttons_frame, text='Approve/Reject Booking', command=lambda: approve_booking())
+        approve_booking_btn.grid(row=1, column=6, padx=10)
 
     # Table Frame with border color
     table_frame = customtkinter.CTkFrame(root, border_color='darkblue', border_width=5)
@@ -491,7 +504,78 @@ def main_page(root, clubname):
     # run refresh table
     refresh_table()
 
-def settings_page(root):
+def settings_page(root, userid):
+    def change_password_page(root, userid):
+        def submit():
+            pass
+
+        password_win = customtkinter.CTkToplevel(root)
+        password_win.title('Change Password')
+        password_win.geometry('500x400')
+        password_win.wm_attributes('-topmost', True)
+
+        # display frame
+        display_frame = customtkinter.CTkFrame(password_win, fg_color='#292B2E')
+        display_frame.pack(fill='both', expand=True)
+
+        # labeels
+        current_pass_label = customtkinter.CTkLabel(display_frame, text='Current Password :')
+        current_pass_label.grid(row=1, column=1, padx=(80, 5), pady=(30,10))
+
+        current_pass_entry = customtkinter.CTkEntry(display_frame,placeholder_text='Enter current password',show='*')
+        current_pass_entry.grid(row=1, column=2, padx=(5, 0), pady=(30,10))
+
+        toggle_visibility = customtkinter.CTkButton(
+            display_frame,
+            fg_color='white',
+            text='',
+            height=20,
+            width=20,
+            hover_color='lightgrey',
+            image=customtkinter.CTkImage(light_image=Image.open('Images/pass_hide.png'), size=(20, 20)),
+            command=lambda: toggle_password_visibility(current_pass_entry, toggle_visibility)
+        )
+        toggle_visibility.grid(row=1, column=3, padx=(5, 0), pady=(30,10))
+
+        new_pass_label = customtkinter.CTkLabel(display_frame, text='New Password :')
+        new_pass_label.grid(row=2, column=1, padx=(80, 5), pady=10)
+
+        new_pass_entry = customtkinter.CTkEntry(display_frame,placeholder_text='Enter new password',show='*')
+        new_pass_entry.grid(row=2, column=2, padx=(5, 0), pady=10)
+
+        toggle_visibility = customtkinter.CTkButton(
+            display_frame,
+            fg_color='white',
+            text='',
+            height=20,
+            width=20,
+            hover_color='lightgrey',
+            image=customtkinter.CTkImage(light_image=Image.open('Images/pass_hide.png'), size=(20, 20)),
+            command=lambda: toggle_password_visibility(new_pass_entry, toggle_visibility)
+        )
+
+        toggle_visibility.grid(row=2, column=3, padx=(5, 0), pady=10)
+
+        confirm_pass_label = customtkinter.CTkLabel(display_frame, text='Confirm Password :')
+        confirm_pass_label.grid(row=3, column=1, padx=(80, 5), pady=10)
+
+        confirm_pass_entry = customtkinter.CTkEntry(display_frame,placeholder_text='Confirm new password',show='*')
+        confirm_pass_entry.grid(row=3, column=2, padx=(5, 0), pady=10)
+
+        toggle_visibility = customtkinter.CTkButton(
+            display_frame,
+            fg_color='white',
+            text='',
+            height=20,
+            width=20,
+            hover_color='lightgrey',
+            image=customtkinter.CTkImage(light_image=Image.open('Images/pass_hide.png'), size=(20, 20)),
+            command=lambda: toggle_password_visibility(confirm_pass_entry, toggle_visibility)
+        )
+        toggle_visibility.grid(row=3, column=3, padx=(5, 0), pady=5)
+
+        submit_button = customtkinter.CTkButton(display_frame, text='Submit', command=lambda: submit(userid, current_pass_entry.get(), new_pass_entry.get(), confirm_pass_entry.get()))
+        submit_button.grid(row=4, column=2, pady=30)
     #clear screen
     for widget in root.winfo_children():
         widget.destroy()
@@ -511,3 +595,19 @@ def settings_page(root):
     )
 
     title_label.pack(pady=20)
+
+    # display feilds
+    userid_label = customtkinter.CTkLabel(root, text='User ID : ' + userid, font=('Helvetica', 16))
+    userid_label.pack(pady=20)
+
+    username_label = customtkinter.CTkLabel(root, text='Username : ' + dbms.get_clubname(userid), font=('Helvetica', 16))
+    username_label.pack(pady=20)
+
+    change_password_btn = customtkinter.CTkButton(root, text='Change Password', command=lambda: change_password_page(root, userid))
+    change_password_btn.pack(pady=20)
+
+    return_to_main = customtkinter.CTkButton(root, text='Return to Main', command=lambda: main_page(root, userid))
+    return_to_main.pack(pady=20)
+
+    logout_btn = customtkinter.CTkButton(root, text='Logout', command=lambda : login_page(root))
+    logout_btn.pack(pady=20)

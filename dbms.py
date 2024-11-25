@@ -1,18 +1,22 @@
 import mysql.connector
 
-def verify_login(username, password, type):
-    print(username, password, type)
+def verify_login(userid, password, type):
+    print(userid, password, type)
     return True
 
-def register_user(user, clubname, password):
-    print(user, clubname, password)
+def register_user(userid, clubname, password):
+    print(userid, clubname, password)
     return True
 
 def last_booking_id():
     return 4
 
-def get_clubname(username):
+def get_clubname(userid):
     #agar username ek admin ho to 'ADMIN' return krna nhito clubname (keep in capital letters)
+    return 'ADMIN'
+
+def fetch_user_type(userid):
+    #agar username ek admin ho to 'ADMIN' return krna nhito 'CLUB' return krna
     return 'ADMIN'
 
 def fetch_data(from_date, to_date):
