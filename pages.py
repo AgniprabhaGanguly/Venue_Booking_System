@@ -119,6 +119,8 @@ def RegisterUser(root):
         status = dbms.register_user(ID, name, password)
         if (status == True):
             login_page(root)
+        else:
+            error_label.configure(text='User ID already exists')
 
     #clear screen
     for widget in root.winfo_children():
@@ -219,9 +221,12 @@ def RegisterUser(root):
 
     login_button.pack(pady=20)
 
+    error_label =  customtkinter.CTkLabel(button_frame, text="")
+    error_label.pack(pady=20)
+
 def main_page(root, userid):
     #supporting database functions
-    def fetch_data(from_date = None, to_date = None):
+    def fetch_data(from_date, to_date):
         data = dbms.fetch_data(from_date, to_date)
         return data
 
@@ -239,8 +244,8 @@ def main_page(root, userid):
         pass
 
     #supporting functions
-    def refresh_table():
-        lst = fetch_data()
+    def refresh_table(from_date=None, to_date=None):
+        lst = fetch_data(from_date, to_date)
         for item in table.get_children():
             table.delete(item)
         for i in range(1, len(lst) + 1):
@@ -383,11 +388,48 @@ def main_page(root, userid):
         submit.grid(row=7, column=0, columnspan=2, padx=(100, 0), pady=5)
 
     def filter_table():
-        pass
+        def fetch_filtered_table():
+            from_date = selected_from_date.get()
+            to_date = selected_to_date.get()
+            refresh_table(from_date, to_date)
+            filter_win.destroy()
+
+        filter_win = customtkinter.CTkToplevel(root)
+        filter_win.title('Filter Table')
+        filter_win.geometry('500x400')
+        filter_win.wm_attributes('-topmost', True)
+
+        # From Date
+        label = customtkinter.CTkLabel(filter_win, text='From Date')
+        label.grid(row=3, column=0, padx=(80, 5), pady=5)
+
+        selected_from_date = customtkinter.CTkEntry(filter_win)
+        selected_from_date.configure(state='disabled')
+        selected_from_date.grid(row=3, column=1, padx=(5, 0), pady=5)
+
+        button = customtkinter.CTkButton(filter_win, text='Select Date',command=lambda: get_date(selected_from_date, filter_win))
+        button.grid(row=3, column=2, padx=(5, 0), pady=5)
+
+        # To Date
+        label = customtkinter.CTkLabel(filter_win, text='To Date')
+        label.grid(row=3, column=0, padx=(80, 5), pady=5)
+
+        selected_to_date = customtkinter.CTkEntry(filter_win)
+        selected_to_date.configure(state='disabled')
+        selected_to_date.grid(row=3, column=1, padx=(5, 0), pady=5)
+
+        button = customtkinter.CTkButton(filter_win, text='Select Date',command=lambda: get_date(selected_to_date, filter_win))
+        button.grid(row=3, column=2, padx=(5, 0), pady=5)
+
+        #filter
+        submit_btn = customtkinter.CTkButton(filter_win, text='Submit', command=lambda : fetch_filtered_table())
+
     def reset_filters():
-        pass
+        refresh_table()
+
     def cancel_booking():
         pass
+
     #admins
     def approve_booking():
         pass
@@ -600,7 +642,7 @@ def settings_page(root, userid):
     userid_label = customtkinter.CTkLabel(root, text='User ID : ' + userid, font=('Helvetica', 16))
     userid_label.pack(pady=20)
 
-    username_label = customtkinter.CTkLabel(root, text='Username : ' + dbms.get_clubname(userid), font=('Helvetica', 16))
+    username_label = customtkinter.CTkLabel(root, text='Username : ' + dbms.get_username(userid), font=('Helvetica', 16))
     username_label.pack(pady=20)
 
     change_password_btn = customtkinter.CTkButton(root, text='Change Password', command=lambda: change_password_page(root, userid))
