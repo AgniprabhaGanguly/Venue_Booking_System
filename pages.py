@@ -643,9 +643,19 @@ def main_page(root, userid):
     refresh_table()
 
 def settings_page(root, userid):
-    def change_password_page(root, userid):
-        def submit():
-            pass
+    def change_password_page():
+        def submit(current, new, confirm):
+            if new == confirm:
+                status = dbms.change_password(userid, current, new)
+                if status == True:
+                    error_label.configure(text='Password updated')
+                    password_win.destroy()
+                else:
+                    error_label.configure(text='Password not updated (due to conflicting current password)')
+                    password_win.destroy()
+            else:
+                error_label.configure(text='New and confirm asswords do not match')
+                password_win.destroy()
 
         password_win = customtkinter.CTkToplevel(root)
         password_win.title('Change Password')
@@ -712,7 +722,7 @@ def settings_page(root, userid):
         )
         toggle_visibility.grid(row=3, column=3, padx=(5, 0), pady=5)
 
-        submit_button = customtkinter.CTkButton(display_frame, text='Submit', command=lambda: submit(userid, current_pass_entry.get(), new_pass_entry.get(), confirm_pass_entry.get()))
+        submit_button = customtkinter.CTkButton(display_frame, text='Submit', command=lambda: submit(current_pass_entry.get(), new_pass_entry.get(), confirm_pass_entry.get()))
         submit_button.grid(row=4, column=2, pady=30)
     #clear screen
     for widget in root.winfo_children():
@@ -741,7 +751,7 @@ def settings_page(root, userid):
     username_label = customtkinter.CTkLabel(root, text='Username : ' + dbms.get_username(userid), font=('Helvetica', 16))
     username_label.pack(pady=20)
 
-    change_password_btn = customtkinter.CTkButton(root, text='Change Password', command=lambda: change_password_page(root, userid))
+    change_password_btn = customtkinter.CTkButton(root, text='Change Password', command=lambda: change_password_page())
     change_password_btn.pack(pady=20)
 
     return_to_main = customtkinter.CTkButton(root, text='Return to Main', command=lambda: main_page(root, userid))
@@ -749,3 +759,6 @@ def settings_page(root, userid):
 
     logout_btn = customtkinter.CTkButton(root, text='Logout', command=lambda : login_page(root))
     logout_btn.pack(pady=20)
+
+    error_label = customtkinter.CTkLabel(root, text='')
+    error_label.pack(pady=20)

@@ -148,3 +148,22 @@ def update_status(bookingid, status):
         print(f"Database error: {e}")
         return False
 
+def change_password(userid, old_password, new_password):
+    try:
+        cursor = conn.cursor()
+        #check query
+        query = "SELECT * FROM users WHERE userid = %s AND password = %s"
+        cursor.execute(query, (userid, old_password))
+        user = cursor.fetchone()
+        if user:
+            query = "UPDATE users SET password = %s WHERE userid = %s"
+            cursor.execute(query, (new_password, userid))
+            conn.commit()
+            print("data updated")
+            return True
+        else:
+            print("User current password do not match")
+            return False
+    except Error as e:
+        print(f"Database error: {e}")
+        return False
