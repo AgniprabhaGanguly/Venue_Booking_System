@@ -4,6 +4,7 @@ from datetime import datetime
 
 # Database connection
 try:
+    #write host user password and database of you computer
     conn = mysql.connector.connect(
         host='localhost',
         user='root',
@@ -15,6 +16,27 @@ try:
 except Error as e:
     print(f"Error connecting to database: {e}")
     conn = None
+
+#create these tabels on your database
+'''
+CREATE TABLE users (
+    userid VARCHAR(50) PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    type ENUM('ADMIN', 'CLUB') NOT NULL
+);
+CREATE TABLE venue (
+    bookingid INT AUTO_INCREMENT PRIMARY KEY,
+    venue VARCHAR(100) NOT NULL,
+    bookedby VARCHAR(50),
+    fromdate DATE NOT NULL,
+    todate DATE NOT NULL,
+    fromtime VARCHAR(10) NOT NULL,
+    totime VARCHAR(10) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (bookedby) REFERENCES users(userid)
+);
+'''
 
 def verify_login(userid, password, type):
     try:
